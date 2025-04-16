@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warehouse Assistant Chatbot</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #121212;
+            color: white;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h1 {
+            font-size: 36px;
+            color: #FFCC00;
+        }
+        .chat-box {
+            background-color: #1E1E1E;
+            border-radius: 10px;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 400px;
+            margin-bottom: 20px;
+        }
+        .message {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .user-message {
+            background-color: #2d87f0;
+            text-align: right;
+        }
+        .bot-message {
+            background-color: #4caf50;
+            text-align: left;
+        }
+        .input-container {
+            display: flex;
+            justify-content: space-between;
+        }
+        input[type="text"] {
+            width: 80%;
+            padding: 12px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            background-color: #333;
+            color: white;
+        }
+        button {
+            width: 18%;
+            padding: 12px;
+            background-color: #FFCC00;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #e6b800;
+        }
+        .suggestions {
+            margin-top: 20px;
+            background-color: #333;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        .suggestions p {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        .suggestions ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .suggestions li {
+            margin: 5px 0;
+            padding: 8px;
+            background-color: #444;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .suggestions li:hover {
+            background-color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Warehouse Assistant Chatbot</h1>
+            <p>Get product details and stock information quickly.</p>
+        </div>
+
+        <div class="chat-box" id="chat-box">
+            <!-- Chat messages appear here -->
+        </div>
+
+        <div class="input-container">
+            <input type="text" id="user-input" placeholder="Ask about products...">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+
+        <div class="suggestions">
+            <p><strong>Suggested Questions:</strong></p>
+            <ul>
+                <li onclick="suggest('What is the stock of laptops?')">What is the stock of laptops?</li>
+                <li onclick="suggest('How many mobiles are available?')">How many mobiles are available?</li>
+                <li onclick="suggest('Tell me about the headphones stock.')">Tell me about the headphones stock.</li>
+                <li onclick="suggest('Add 10 usb cables to H4')">Add 10 usb cables to H4</li>
+                <li onclick="suggest('Remove all tablets from warehouse')">Remove all tablets from warehouse</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        async function sendMessage() {
+            const inputField = document.getElementById('user-input');
+            const userInput = inputField.value.trim();
+            if (userInput === "") return;
+
+            displayMessage(userInput, 'user-message');
+
+            try {
+                const response = await fetch('/get_product_info', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: userInput })
+                });
+
+                const data = await response.json();
+                displayMessage(data.response, 'bot-message');
+            } catch (error) {
+                displayMessage("Sorry, something went wrong. Try again later.", 'bot-message');
+            }
+
+            inputField.value = '';
+        }
+
+        function displayMessage(message, className) {
+            const chatBox = document.getElementById('chat-box');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message ' + className;
+            messageDiv.textContent = message;
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function suggest(text) {
+            document.getElementById('user-input').value = text;
+            sendMessage();
+        }
+    </script>
+</body>
+</html>
+
